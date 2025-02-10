@@ -25,3 +25,10 @@ variable "ebs_size" {
   type        = number
   default     = 10
 }
+variable "subnet_id" {
+  type = string
+}
+
+variable "vpc_id" {
+  type = string
+}
