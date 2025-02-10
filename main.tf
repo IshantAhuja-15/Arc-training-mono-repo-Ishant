@@ -10,10 +10,10 @@ terraform {
 }
 
 provider "aws" {
-  region =  "ap-south-1"  
+  region = "ap-south-1"
 }
 
-
+# Data sources for AWS VPC and Secrets Manager
 data "aws_vpc" "default" {
   default = true
 }
@@ -26,20 +26,40 @@ data "aws_subnets" "private" {
 }
 
 data "aws_secretsmanager_secret" "rds_password" {
-  name = "rds-dev-password"  
+  name = "rds-dev-password"
 }
 
 data "aws_secretsmanager_secret_version" "rds_password" {
   secret_id = data.aws_secretsmanager_secret.rds_password.id
 }
 
+# EC2 Module
+module "ec2_instance" {
+  source        = "./Modules/EC2"
+  ami_id        = "ami-0c614dee691cbbf37"
+  instance_type = "t2.micro"
+  key_name      = "abhi"
+  instance_name = "Ishant-EC2"
+  ebs_size      = 20
+}
 
+# Network Module
+module "network" {
+  source = "./Modules/Network"
+
+  vpc_cidr             = "10.0.0.0/16"
+  public_subnet_cidrs  = ["10.0.1.0/24", "10.0.2.0/24"]
+  private_subnet_cidrs = ["10.0.3.0/24", "10.0.4.0/24"]
+  availability_zones   = ["us-east-1a", "us-east-1b"]
+}
+
+# RDS Module
 module "rds" {
   source       = "./rds"
-  region       =  "us-east-1"
-  environment  =  "dev"  
-  namespace    =  "my-namespace"  
-  vpc_id       = data.aws_vpc.default.id  
+  region       = "us-east-1"
+  environment  = "dev"
+  namespace    = "my-namespace"
+  vpc_id       = data.aws_vpc.default.id
   subnet_ids   = data.aws_subnets.private.ids
 
   name           = "ishant"
@@ -47,7 +67,7 @@ module "rds" {
   engine_version = "16.3"
   instance_class = "db.t3.small"
   username       = "postgres"
-  db_password   = data.aws_secretsmanager_secret_version.rds_password.secret_string
+  db_password    = data.aws_secretsmanager_secret_version.rds_password.secret_string
 
   security_group_data = {
     create      = true
