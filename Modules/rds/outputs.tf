@@ -12,3 +12,10 @@ output "rds_sg_id" {
   value       = aws_security_group.rds_sg[*].id
   description = "The ID of the security group created for RDS"
 }
+
+
+output "generated_password" {
+  value       = local.master_password
+  description = "The RDS master password (generated if not provided)"
+  sensitive   = true
+}

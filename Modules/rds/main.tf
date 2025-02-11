@@ -28,9 +28,23 @@ resource "aws_security_group" "rds_sg" {
 }
 
 resource "aws_db_subnet_group" "rds_subnet_group" {
-  name = "${var.namespace}-${var.environment}-subnet-group"
-
+  name       = "${var.namespace}-${var.environment}-subnet-group"
   subnet_ids = var.subnet_ids
+}
+
+
+resource "random_password" "master" {
+  length           = 16
+  special          = true
+  override_special = "!#$%^&*()-_=+[]{}|;:,.<>?" # Exclude /, @, " and space
+}
+
+
+locals {
+  master_password = coalesce(
+    var.password,
+    random_password.master.result
+  )
 }
 
 resource "aws_db_instance" "rds" {
@@ -41,7 +55,7 @@ resource "aws_db_instance" "rds" {
   instance_class         = var.instance_class
   db_name                = var.name
   username               = var.username
-  password               = var.db_password
+  password               = local.master_password
   parameter_group_name   = "default.postgres16"
   publicly_accessible    = false
   vpc_security_group_ids = [aws_security_group.rds_sg[0].id]

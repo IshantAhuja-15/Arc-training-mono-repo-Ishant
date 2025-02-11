@@ -36,31 +36,24 @@ module "ec2_instance" {
   vpc_id    = module.network.vpc_id
 }
 
-# --- FETCH RDS PASSWORD FROM SECRETS MANAGER ---
-data "aws_secretsmanager_secret" "rds_password" {
-  name = "rds-dev-password" # Replace with the actual secret name
-}
-
-data "aws_secretsmanager_secret_version" "rds_password" {
-  secret_id = data.aws_secretsmanager_secret.rds_password.id
-}
-
 # --- RDS MODULE ---
+
 module "rds" {
   source      = "./Modules/rds"
   region      = "us-east-1"
   environment = "dev"
   namespace   = "my-namespace"
-
-  vpc_id     = module.network.vpc_id
-  subnet_ids = module.network.private_subnet_ids # Use private subnets for RDS
+  vpc_id      = module.network.vpc_id
+  subnet_ids  = module.network.private_subnet_ids
 
   name           = "ishant"
   engine         = "postgres"
   engine_version = "16.3"
   instance_class = "db.t3.small"
   username       = "postgres"
-  db_password    = data.aws_secretsmanager_secret_version.rds_password.secret_string
+
+
+  password = null
 
   security_group_data = {
     create      = true
@@ -68,7 +61,7 @@ module "rds" {
     ingress_rules = [
       {
         description = "Allow traffic from VPC"
-        cidr_block  = "10.0.0.0/16" # Use custom VPC CIDR instead of default
+        cidr_block  = module.network.vpc_cidr
         from_port   = 5432
         ip_protocol = "tcp"
         to_port     = 5432
@@ -84,4 +77,7 @@ module "rds" {
       }
     ]
   }
+
+
+  manage_user_password = true
 }

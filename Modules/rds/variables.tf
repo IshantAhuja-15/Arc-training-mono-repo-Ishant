@@ -47,12 +47,19 @@ variable "username" {
   type        = string
   description = "Database username"
 }
-variable "db_password" {
+
+variable "password" {
   type        = string
-  description = "Master password for the RDS instance"
+  description = "Master password for the RDS instance. If not provided and manage_user_password is true, a random password will be generated."
+  default     = null
   sensitive   = true
 }
 
+variable "manage_user_password" {
+  type        = bool
+  description = "If true, a random password will be generated if no password is provided."
+  default     = false
+}
 
 variable "security_group_data" {
   type = object({
