@@ -38,12 +38,31 @@ resource "random_password" "master" {
   special          = true
   override_special = "!#$%^&*()-_=+[]{}|;:,.<>?" # Exclude /, @, " and space
 }
+resource "aws_ssm_parameter" "db_password" {
+  name  = "/${var.environment}/${var.namespace}/db/password"
+  type  = "SecureString"
+  value = random_password.db_password.result
 
+  tags = {
+    Name = "db-password"
+  }
+}
+resource "aws_ssm_parameter" "db_password" {
+  count = var.manage_user_password ? 1 : 0
+
+  name  = "/${var.environment}/${var.namespace}/db/password"
+  type  = "SecureString"
+  value = random_password.master[0].result  # Use [0] to prevent errors
+
+  tags = {
+    Name = "db-password"
+  }
+}
 
 locals {
   master_password = coalesce(
     var.password,
-    random_password.master.result
+    random_password.master[0].result 
   )
 }
 
