@@ -1,20 +1,18 @@
-################################################################
-## shared
-################################################################
+
 variable "environment" {
   type        = string
-  description = "Name of the environment, i.e. dev, stage, prod"
+  description = "dev"
   default     = "poc"
 }
 
 variable "region" {
   type        = string
-  description = "AWS Region"
+  description = "AWS Region to deploy into"
   default     = "us-east-1"
 }
 
 variable "namespace" {
   type        = string
-  description = "Namespace of the project, i.e. refarch"
+  description = "Namespace"
   default     = "arc"
 }
