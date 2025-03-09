@@ -5,11 +5,11 @@
 data "aws_vpc" "vpc" {
   filter {
     name   = "tag:Name"
-    values = ["arc-poc"] # Correct VPC name
+    values = ["ishant-dev-vpc"]
   }
 }
 
-## network
+
 data "aws_subnets" "private" {
   filter {
     name   = "vpc-id"
@@ -18,8 +18,8 @@ data "aws_subnets" "private" {
   filter {
     name = "tag:Name"
     values = [
-      "arc-poc-us-east-1a-1", # Private subnet 1
-      "arc-poc-us-east-1b-2"  # Private subnet 2
+      "ishant-dev-private-subnet-private-use1a",
+      "ishant-dev-private-subnet-private-use1b"
     ]
   }
 }
